@@ -22,6 +22,20 @@ class LoginView(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
+    
+class LogoutView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Token des aktuellen Benutzers abrufen
+            token = request.auth
+            # Token löschen
+            token.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)  # Erfolgreiches Logout
+        except Token.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)  # Token nicht gefunden
 
 class SiginUserView(APIView):
     def post(self, request):
