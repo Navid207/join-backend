@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework import serializers
-from .models import Task
+from .models import Task, Category
 
 class SiginUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -31,12 +31,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'email'] 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id','name', 'color_code'] 
+
 class TaskSerializer(serializers.ModelSerializer):
     # category = serializers.StringRelatedField()  # Um den Namen der Kategorie anzuzeigen
     # assigned_users = serializers.StringRelatedField(many=True)  # Um die Namen der User anzuzeigen
     # assigned_users = UserSerializer(many=True) 
-    due_date = serializers.DateField(format="%Y-%m-%d")
+    due_date = serializers.DateField(format="%d-%m-%Y")
 
     class Meta:
         model = Task
-        fields = ['title', 'description', 'due_date', 'priority', 'assigned_users'] #  'category'
+        fields = ['id','title', 'description', 'due_date', 'priority', 'category', 'assigned_users']

@@ -4,8 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .serializers import SiginUserSerializer, TaskSerializer
-from .models import Task
+from .serializers import SiginUserSerializer, CategorySerializer, TaskSerializer
+from .models import Task, Category
 from django.db import IntegrityError
 from rest_framework.authentication import TokenAuthentication
 
@@ -45,6 +45,34 @@ class SiginUserView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class CategoryView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Stellt sicher, dass der User authentifiziert ist
+
+    def get(self, request):
+        categorys = Category.objects.all()
+        serializer = CategorySerializer(categorys, many=True)
+        return Response(serializer.data)     
+
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        if pk in [1, 2, 3]:
+            return Response({'detail': 'Not allowed to delete this category.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            category = Category.objects.get(pk=pk)
+            category.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)  # Erfolgreiches Löschen ohne Inhalt
+        except Category.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)  # Category nicht gefunden
+        
+
 class TaskViewSet(APIView):
     # serializer_class = TaskSerializer
     authentication_classes = [TokenAuthentication]
