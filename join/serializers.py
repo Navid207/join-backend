@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework import serializers
-from .models import Task, Category
+from .models import Task, Category, Contact
 
 class SiginUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -45,3 +45,13 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id','title', 'description', 'due_date', 'priority', 'category', 'assigned_users']
+
+class ContactSerializer(serializers.ModelSerializer):
+    initials = serializers.SerializerMethodField()
+    class Meta:
+        model = Contact
+        fields = ['id','first_name', 'last_name', 'phone', 'email', 'color_code', 'initials'] 
+    
+    def get_initials(self, obj):
+        # Holt den ersten Buchstaben des Vor- und Nachnamens
+        return f"{obj.first_name[0].upper()}{obj.last_name[0].upper()}"

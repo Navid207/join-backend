@@ -51,3 +51,9 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+class Contact(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone = models.IntegerField()
+    email = models.CharField(max_length=100)
+    color_code = models.CharField(max_length=100)

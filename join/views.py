@@ -4,8 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .serializers import SiginUserSerializer, CategorySerializer, TaskSerializer
-from .models import Task, Category
+from .serializers import SiginUserSerializer, CategorySerializer, TaskSerializer, ContactSerializer
+from .models import Task, Category, Contact
 from django.db import IntegrityError
 from rest_framework.authentication import TokenAuthentication
 
@@ -70,8 +70,7 @@ class CategoryView(APIView):
             category.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)  # Erfolgreiches Löschen ohne Inhalt
         except Category.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)  # Category nicht gefunden
-        
+            return Response(status=status.HTTP_404_NOT_FOUND)  # Category nicht gefunden     
 
 class TaskViewSet(APIView):
     # serializer_class = TaskSerializer
@@ -109,3 +108,27 @@ class TaskViewSet(APIView):
         except Task.DoesNotExist:
             print(f"Task with id {pk} does not exist or is not authored by {request.user.id}")
             return Response(status=status.HTTP_404_NOT_FOUND)  # Aufgabe nicht gefunden
+        
+class ContactView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Stellt sicher, dass der User authentifiziert ist
+
+    def get(self, request):
+        categorys = Contact.objects.all()
+        serializer = ContactSerializer(categorys, many=True)
+        return Response(serializer.data)     
+
+    def post(self, request):
+        serializer = ContactSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save() 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk): 
+        try:
+            contact = Contact.objects.get(pk=pk)
+            contact.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)  # Erfolgreiches Löschen ohne Inhalt
+        except Contact.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)  # Category nicht gefunden     
